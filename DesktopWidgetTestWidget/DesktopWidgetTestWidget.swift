@@ -7,49 +7,52 @@
 
 import WidgetKit
 import SwiftUI
+import os.log
 
 
 struct Provider: TimelineProvider {
+    private func loadImage() -> NSImage? {
+        os_log("[WidgetLog] 1. loadImage() called.", log: OSLog.default, type: .debug)
+        let userDefaults = UserDefaults(suiteName: "group.desktopw.dy")
+        guard let imageData = userDefaults?.data(forKey: "widgetImageData") else {
+            os_log("[WidgetLog] 2. Failed: No image data found in UserDefaults.", log: OSLog.default, type: .error)
+            return nil
+        }
+        os_log("[WidgetLog] 2. Success: Found image data (%{public}d bytes).", log: OSLog.default, type: .debug, imageData.count)
+        
+        if let image = NSImage(data: imageData) {
+            os_log("[WidgetLog] 3. Success: Image loaded successfully from data!", log: OSLog.default, type: .debug)
+            return image
+        } else {
+            os_log("[WidgetLog] 3. Failed: NSImage(data:) returned nil.", log: OSLog.default, type: .error)
+            return nil
+        }
+    }
+
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date())
+        SimpleEntry(date: Date(), image: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date())
+        let entry = SimpleEntry(date: Date(), image: loadImage())
         completion(entry)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> ()) {
-        let timeline = Timeline(entries: [SimpleEntry(date: Date())], policy: .never)
-        completion(timeline)
-    }
+
 }
 
 struct SimpleEntry: TimelineEntry {
-  let date: Date
-}
-
-struct DesktopWidgetTestWidgetEntryView: View {
-    var entry: SimpleEntry
-
-    var body: some View {
-        GeometryReader { geometry in
-            Image("sampleImage") // 프로젝트 Assets에 추가한 이미지 이름
-                .resizable()
-                .scaledToFill()
-                .frame(width: geometry.size.width, height: geometry.size.height)
-                .clipped()
-        }
-    }
+    let date: Date
+    let image: NSImage?
 }
 
 struct DesktopWidgetTestWidget: Widget {
-    let kind: String = "YourWidget"
+    let kind: String = "DesktopWidgetTestWidget"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-          DesktopWidgetTestWidgetEntryView(entry: entry)
-            .containerBackground(.background, for: .widget)
+            DesktopWidgetTestWidgetEntryView(entry: entry)
+                .containerBackground(.background, for: .widget)
         }
         .configurationDisplayName("Full-bleed Image Widget")
         .description("A widget that shows an image without borders or padding.")

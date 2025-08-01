@@ -1,3 +1,4 @@
+/*
 //
 //  AppIntent.swift
 //  DesktopWidgetTestWidget
@@ -8,11 +9,17 @@
 import WidgetKit
 import AppIntents
 
-struct ConfigurationAppIntent: WidgetConfigurationIntent {
-    static var title: LocalizedStringResource { "Configuration" }
-    static var description: IntentDescription { "This is an example widget." }
+struct UpdateWidgetIntent: AppIntent {
+    static var title: LocalizedStringResource = "Update Image Widget"
+    static var description = IntentDescription("Updates the widget with the selected image.")
 
-    // An example configurable parameter.
-    @Parameter(title: "Favorite Emoji", default: "😃")
-    var favoriteEmoji: String
+    // We don't need any parameters from the user for this intent.
+    // The app will provide the necessary data.
+
+    func perform() async throws -> some IntentResult {
+        // This tells WidgetKit to reload the timeline for our specific widget.
+        WidgetCenter.shared.reloadTimelines(ofKind: "DesktopWidgetTestWidget")
+        return .result()
+    }
 }
+*/

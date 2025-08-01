@@ -11,6 +11,6 @@ import SwiftUI
 @main
 struct DesktopWidgetTestWidgetBundle: WidgetBundle {
     var body: some Widget {
-        DesktopWidgetTestWidget()
+      DesktopWidgetTestWidget()
     }
 }
